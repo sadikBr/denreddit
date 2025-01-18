@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "preact/hooks";
 
-type SerachResultsProps = {
+type SearchResultsProps = {
   kind: "user" | "subreddit";
+  searchTerm: string;
   searchResults: any[];
 };
 
@@ -10,7 +11,8 @@ function SearchResults(props: SearchResultsProps) {
     <div class="w-full flex items-center gap-4 pb-8 overflow-x-auto">
       {props.searchResults.map((item, index) => (
         <a
-          href={props.kind + "/" + item.data.display_name}
+          href={`../${props.kind}/${item.data.display_name}` +
+            `?searchTerm=${props.searchTerm}&&kind=${props.kind}&&path=hot&&period=all`}
           key={index}
           class="flex flex-col flex-shrink-0 items-center gap-2"
           title={item.data.display_name}
@@ -78,7 +80,11 @@ export default function SearchResultsIsland(
         </div>
       )}
       {(!loading && error.length === 0) && (
-        <SearchResults kind={props.kind} searchResults={searchResults} />
+        <SearchResults
+          kind={props.kind}
+          searchTerm={props.searchTerm}
+          searchResults={searchResults}
+        />
       )}
     </>
   );

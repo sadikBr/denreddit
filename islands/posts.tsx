@@ -5,6 +5,8 @@ import { extractPostData } from "../utils/extractPostData.ts";
 import { ComponentChild } from "preact/src/index.js";
 
 interface PostLayoutProps {
+  kind: "user" | "subreddit";
+  name: string;
   children: ComponentChild;
   rest: {
     title: string;
@@ -15,7 +17,7 @@ interface PostLayoutProps {
   };
 }
 
-function PostLayout({ children, rest }: PostLayoutProps) {
+function PostLayout({ children, rest, kind, name }: PostLayoutProps) {
   return (
     <div
       title={rest.title}
@@ -30,7 +32,7 @@ function PostLayout({ children, rest }: PostLayoutProps) {
         on{" "}
         <a
           class="text-yellow-500 font-bold"
-          href={`/subreddit/${rest.subreddit}?path=hot`}
+          href={`/subreddit/${rest.subreddit}?searchTerm=${name}&&kind=${kind}&&path=hot&&period=all`}
         >
           r/{rest.subreddit}
         </a>
@@ -41,6 +43,8 @@ function PostLayout({ children, rest }: PostLayoutProps) {
 
 type PostRendererProps = {
   post: PostData;
+  kind: "user" | "subreddit";
+  name: string;
 };
 
 function PostRenderer(props: PostRendererProps) {
@@ -49,18 +53,18 @@ function PostRenderer(props: PostRendererProps) {
   switch (kind) {
     case "image":
       return (
-        <PostLayout rest={rest}>
+        <PostLayout kind={props.kind} name={props.name} rest={rest}>
           <img
             src={rest.url}
             alt={rest.title}
             loading="lazy"
-            className="rounded-md w-full max-h-[800px] bg-black"
+            className="rounded-md w-full object-contain max-h-[800px] bg-black"
           />
         </PostLayout>
       );
     case "video":
       return (
-        <PostLayout rest={rest}>
+        <PostLayout kind={props.kind} name={props.name} rest={rest}>
           <video
             src={rest.url}
             controls
@@ -76,21 +80,32 @@ function PostRenderer(props: PostRendererProps) {
 
 type PostsProps = {
   posts: Post[];
+  kind: "user" | "subreddit";
+  name: string;
 };
 
 function Posts(props: PostsProps) {
   return (
     <div class="w-full columns-1 lg:columns-2">
-      {props.posts.map((post, index) => (
-        <PostRenderer key={post.data.id} post={post.data} />
+      {props.posts.map((post) => (
+        <PostRenderer
+          key={post.data.id}
+          post={post.data}
+          kind={props.kind}
+          name={props.name}
+        />
       ))}
     </div>
   );
 }
 
 type PostsIslandProps = {
-  kind: string;
+  kind: "user" | "subreddit";
   name: string;
+  sort: {
+    path: "hot" | "new" | "top";
+    period: "day" | "week" | "all";
+  };
 };
 
 export default function PostsIsland(props: PostsIslandProps) {
@@ -101,15 +116,19 @@ export default function PostsIsland(props: PostsIslandProps) {
   const url = useMemo(() => {
     return `https://www.reddit.com/${
       props.kind === "user" ? "user" : "r"
-    }/${props.name}/${
-      props.kind === "user" ? "submitted" : ""
-    }.json?limit=100&include_over_18=true`;
+    }/${props.name}/${props.kind === "user" ? "submitted" : ""}/${
+      props.kind === "subreddit" ? `${props.sort.path}` : ""
+    }.json?limit=100&include_over_18=true${
+      props.kind === "subreddit" ? `&&t=${props.sort.period}` : ""
+    }`;
   }, [props]);
 
-  const searchUrl = useMemo(() =>
-    `https://www.reddit.com/search.json?q=${
-      props.name.replaceAll("+", " ")
-    }&limit=100`
+  const searchUrl = useMemo(
+    () =>
+      `https://www.reddit.com/search.json?q=${
+        props.name.replaceAll("+", " ")
+      }&limit=100`,
+    [props],
   );
 
   useEffect(() => {
@@ -142,7 +161,9 @@ export default function PostsIsland(props: PostsIslandProps) {
     <>
       {loading && <div>Loading ...</div>}
       {!loading && error.length > 0 && <div>{error}</div>}
-      {!loading && posts.length > 0 && <Posts posts={posts} />}
+      {!loading && posts.length > 0 && (
+        <Posts posts={posts} kind={props.kind} name={props.name} />
+      )}
       {!loading && !error && posts.length === 0 && (
         <div>No Posts Found for {props.name}</div>
       )}

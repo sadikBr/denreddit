@@ -3,8 +3,10 @@ import PostsIsland from "../islands/posts.tsx";
 import type { Handlers } from "$fresh/server.ts";
 
 type TopSectionProps = {
+  display: string;
   message?: string;
   kind: "user" | "subreddit";
+  searchTerm: string;
   sort: {
     path: "hot" | "new" | "top";
     period: "all" | "day" | "week";
@@ -25,7 +27,7 @@ export function TopSection(props: TopSectionProps) {
           />
         </a>
         <h1 class="text-4xl font-bold text-center">
-          Den<span class="text-yellow-500">Reddit</span> - Reddit Clone
+          Den<span class="text-yellow-500">Reddit</span> - {props.display}
         </h1>
         <form
           method="POST"
@@ -42,6 +44,7 @@ export function TopSection(props: TopSectionProps) {
             </select>
             <input
               type="text"
+              value={props.searchTerm}
               name="searchTerm"
               placeholder="Search Input"
               class="flex-1 px-1 py-2 rounded-md"
@@ -82,7 +85,7 @@ export function TopSection(props: TopSectionProps) {
 }
 
 export const handler: Handlers = {
-  async GET(req, context) {
+  GET(_req, context) {
     return context.render({
       searchTerm: "awww",
       kind: "subreddit",
@@ -100,8 +103,6 @@ export const handler: Handlers = {
       path: form.get("sortPath")?.toString(),
       period: form.get("sortPeriod")?.toString(),
     };
-
-    console.log(searchTerm);
 
     if (!searchTerm) {
       return context.render({
@@ -123,7 +124,10 @@ export const handler: Handlers = {
 
     // Redirect the user.
     const headers = new Headers();
-    headers.set("location", `/subreddit${urlSuffix}`);
+    headers.set(
+      "location",
+      `/subreddit/${searchTerm.replace(" ", "")}/${urlSuffix}`,
+    );
 
     return new Response(null, {
       status: 303,
@@ -133,21 +137,30 @@ export const handler: Handlers = {
 };
 
 export default function Home(
-  { data }: { data: { searchTerm: string; kind: "user" | "subreddit" } },
+  { data }: {
+    data: { searchTerm: string; kind: "user" | "subreddit"; message?: string };
+  },
 ) {
-  const { searchTerm, kind } = data;
+  const searchTerm = data?.searchTerm;
+  const kind = data?.kind;
   const message = data?.message;
 
   return (
     <>
       <TopSection
+        display="Reddit Clone"
+        searchTerm={searchTerm}
         message={message}
         kind={kind}
         sort={{ path: "hot", period: "all" }}
       />
       <div class="px-4 py-8 max-w-7xl mx-auto">
         <SearchResultsIsland kind={kind} searchTerm={searchTerm} />
-        <PostsIsland kind="subreddit" name="awww" />
+        <PostsIsland
+          kind={kind}
+          name={searchTerm}
+          sort={{ path: "hot", period: "all" }}
+        />
       </div>
     </>
   );
