@@ -126,7 +126,7 @@ export const handler: Handlers = {
     const headers = new Headers();
     headers.set(
       "location",
-      `/subreddit/${searchTerm.replace(" ", "")}/${urlSuffix}`,
+      `/subreddit/${searchTerm.replaceAll(" ", "")}/${urlSuffix}`,
     );
 
     return new Response(null, {
