@@ -21,9 +21,9 @@ function SearchResults(props: SearchResultsProps) {
         >
           <img
             src={
+              item.data.community_icon.split("?width")[0] ||
               item.data.icon_img ||
-              item.data.header_img ||
-              item.data.community_icon.split("?width")[0]
+              item.data.header_img
             }
             class="w-[90px] object-cover aspect-square bg-green-300 rounded-full"
           />
