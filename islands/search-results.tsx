@@ -11,19 +11,24 @@ function SearchResults(props: SearchResultsProps) {
     <div class="w-full flex items-center gap-4 pb-8 overflow-x-auto">
       {props.searchResults.map((item, index) => (
         <a
-          href={
-            `../${props.kind}/${item.data.display_name}` +
-            `?searchTerm=${props.searchTerm}&&kind=${props.kind}&&path=hot&&period=all`
-          }
+          href={`../${props.kind}/${
+            props.kind === "user" ? item.data.name : item.data.display_name
+          }${
+            props.kind === "subreddit"
+              ? `?searchTerm=${props.searchTerm}&&kind=${props.kind}&&path=hot&&period=all`
+              : ""
+          }`}
           key={index}
           class="flex flex-col flex-shrink-0 items-center gap-2 border-green-300 border-[3px] rounded-full p-1"
           title={item.data.display_name}
         >
           <img
             src={
-              item.data.community_icon.split("?width")[0] ||
-              item.data.icon_img ||
-              item.data.header_img
+              props.kind === "user"
+                ? item.data.snoovatar_img || item.data.icon_img
+                : item.data.community_icon.split("?width")[0] ||
+                  item.data.icon_img ||
+                  item.data.header_img
             }
             class="w-[90px] object-cover aspect-square bg-green-300 rounded-full"
           />

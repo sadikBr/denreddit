@@ -116,7 +116,7 @@ export const handler: Handlers = {
       });
     }
 
-    let urlSuffix;
+    let urlSuffix = "";
 
     if (kind === "subreddit") {
       const sortUrlString =
@@ -124,15 +124,15 @@ export const handler: Handlers = {
           ? `path=${sort.path}&&period=all`
           : `path=${sort.path}&&period=${sort.period}`;
       urlSuffix = `?searchTerm=${searchTerm}&&kind=${kind}&&${sortUrlString}`;
-    } else {
-      urlSuffix = `?searchTerm=${searchTerm}&&kind=${kind}`;
     }
 
     // Redirect the user.
     const headers = new Headers();
     headers.set(
       "location",
-      `/${kind}/${searchTerm.replaceAll(" ", "")}/${urlSuffix}`
+      `/${kind}/${searchTerm.replaceAll(" ", "")}${
+        urlSuffix.length > 0 ? `/${urlSuffix}` : ""
+      }`
     );
 
     return new Response(null, {
