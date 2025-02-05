@@ -11,14 +11,20 @@ function SearchResults(props: SearchResultsProps) {
     <div class="w-full flex items-center gap-4 pb-8 overflow-x-auto">
       {props.searchResults.map((item, index) => (
         <a
-          href={`../${props.kind}/${item.data.display_name}` +
-            `?searchTerm=${props.searchTerm}&&kind=${props.kind}&&path=hot&&period=all`}
+          href={
+            `../${props.kind}/${item.data.display_name}` +
+            `?searchTerm=${props.searchTerm}&&kind=${props.kind}&&path=hot&&period=all`
+          }
           key={index}
-          class="flex flex-col flex-shrink-0 items-center gap-2"
+          class="flex flex-col flex-shrink-0 items-center gap-2 border-green-300 border-[3px] rounded-full p-1"
           title={item.data.display_name}
         >
           <img
-            src={item.data.community_icon.split("?width")[0]}
+            src={
+              item.data.icon_img ||
+              item.data.header_img ||
+              item.data.community_icon.split("?width")[0]
+            }
             class="w-[90px] object-cover aspect-square bg-green-300 rounded-full"
           />
         </a>
@@ -32,9 +38,7 @@ type SearchResultsIslandProps = {
   searchTerm: string;
 };
 
-export default function SearchResultsIsland(
-  props: SearchResultsIslandProps,
-) {
+export default function SearchResultsIsland(props: SearchResultsIslandProps) {
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -67,7 +71,7 @@ export default function SearchResultsIsland(
     <>
       {(loading || error.length > 0) && (
         <div class="mb-8">
-          {(loading && error.length === 0) && (
+          {loading && error.length === 0 && (
             <div class="font-bold uppercase text-sm text-center">
               Loading ...
             </div>
@@ -79,7 +83,7 @@ export default function SearchResultsIsland(
           )}
         </div>
       )}
-      {(!loading && error.length === 0) && (
+      {!loading && error.length === 0 && (
         <SearchResults
           kind={props.kind}
           searchTerm={props.searchTerm}

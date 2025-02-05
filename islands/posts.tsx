@@ -114,21 +114,22 @@ export default function PostsIsland(props: PostsIslandProps) {
   const [error, setError] = useState("");
 
   const url = useMemo(() => {
-    return `https://www.reddit.com/${
-      props.kind === "user" ? "user" : "r"
-    }/${props.name}/${props.kind === "user" ? "submitted" : ""}/${
+    return `https://www.reddit.com/${props.kind === "user" ? "user" : "r"}/${
+      props.name
+    }/${props.kind === "user" ? "submitted" : ""}/${
       props.kind === "subreddit" ? `${props.sort.path}` : ""
     }.json?limit=100&include_over_18=true${
-      props.kind === "subreddit" ? `&&t=${props.sort.period}` : ""
+      props.kind === "subreddit" ? `&t=${props.sort.period}` : ""
     }`;
   }, [props]);
 
   const searchUrl = useMemo(
     () =>
-      `https://www.reddit.com/search.json?q=${
-        props.name.replaceAll("+", " ")
-      }&limit=100`,
-    [props],
+      `https://www.reddit.com/search.json?q=${props.name.replaceAll(
+        "+",
+        " "
+      )}&limit=100&include_over_18=true`,
+    [props]
   );
 
   useEffect(() => {

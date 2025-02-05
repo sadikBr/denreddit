@@ -116,17 +116,23 @@ export const handler: Handlers = {
       });
     }
 
-    const sortUrlString = sort.path === "hot" || sort.path === "new"
-      ? `path=${sort.path}&&period=all`
-      : `path=${sort.path}&&period=${sort.period}`;
-    const urlSuffix =
-      `?searchTerm=${searchTerm}&&kind=${kind}&&${sortUrlString}`;
+    let urlSuffix;
+
+    if (kind === "subreddit") {
+      const sortUrlString =
+        sort.path === "hot" || sort.path === "new"
+          ? `path=${sort.path}&&period=all`
+          : `path=${sort.path}&&period=${sort.period}`;
+      urlSuffix = `?searchTerm=${searchTerm}&&kind=${kind}&&${sortUrlString}`;
+    } else {
+      urlSuffix = `?searchTerm=${searchTerm}&&kind=${kind}`;
+    }
 
     // Redirect the user.
     const headers = new Headers();
     headers.set(
       "location",
-      `/subreddit/${searchTerm.replace(" ", "")}/${urlSuffix}`,
+      `/${kind}/${searchTerm.replaceAll(" ", "")}/${urlSuffix}`
     );
 
     return new Response(null, {
@@ -136,11 +142,11 @@ export const handler: Handlers = {
   },
 };
 
-export default function Home(
-  { data }: {
-    data: { searchTerm: string; kind: "user" | "subreddit"; message?: string };
-  },
-) {
+export default function Home({
+  data,
+}: {
+  data: { searchTerm: string; kind: "user" | "subreddit"; message?: string };
+}) {
   const searchTerm = data?.searchTerm;
   const kind = data?.kind;
   const message = data?.message;

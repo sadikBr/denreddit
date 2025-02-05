@@ -38,4 +38,3 @@ export function extractPostData(post: PostData) {
 
   return postData;
 }
-
